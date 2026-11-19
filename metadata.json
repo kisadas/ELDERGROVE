@@ -1,0 +1,8 @@
+{
+  "name": "Eldergrove Online",
+  "description": "A cooperative 3D fantasy MMO RPG where you team up with friends to fight monsters, conquer world bosses, collect loot, and level up together.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

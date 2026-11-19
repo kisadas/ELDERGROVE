@@ -1,0 +1,231 @@
+{
+  "entities": {
+    "UserAccount": {
+      "title": "UserAccount",
+      "description": "Private authenticated player account profile, preferences, and last server selection.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the account owner.",
+          "minLength": 4,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Owner email address (PII, owner-read only).",
+          "maxLength": 160
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Account display name.",
+          "minLength": 1,
+          "maxLength": 48
+        },
+        "lastServer": {
+          "type": "string",
+          "description": "Most recently used server/realm code.",
+          "minLength": 2,
+          "maxLength": 24,
+          "pattern": "^[A-Z0-9\\-]+$"
+        },
+        "settings": {
+          "type": "object",
+          "description": "Saved user game, audio, camera, graphics, and customizable keybind settings."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server last update timestamp."
+        }
+      },
+      "required": ["uid", "email", "displayName", "lastServer", "createdAt", "updatedAt"]
+    },
+    "CharacterProfile": {
+      "title": "CharacterProfile",
+      "description": "Persistent character save belonging to a user account, retaining class, job advancements, pets, mounts, inventory, quests, and zone unlocks.",
+      "type": "object",
+      "properties": {
+        "playerId": {
+          "type": "string",
+          "description": "Unique character identifier.",
+          "minLength": 4,
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the character owner.",
+          "minLength": 4,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "description": "Character display name.",
+          "minLength": 1,
+          "maxLength": 18
+        },
+        "heroClass": {
+          "type": "string",
+          "description": "Character base class.",
+          "enum": ["warrior", "mage", "archer", "healer", "assassin", "summoner"]
+        },
+        "jobId": {
+          "type": "string",
+          "description": "Active advanced job branch ID or empty string.",
+          "maxLength": 40
+        },
+        "jobTier": {
+          "type": "number",
+          "description": "Current job advancement tier (0 to 8)."
+        },
+        "unlockedJobs": {
+          "type": "array",
+          "description": "List of unlocked job branch IDs (up to 8)."
+        },
+        "level": {
+          "type": "number",
+          "description": "Character level."
+        },
+        "xp": {
+          "type": "number",
+          "description": "Current level experience points."
+        },
+        "gold": {
+          "type": "number",
+          "description": "Gold currency."
+        },
+        "kills": {
+          "type": "number",
+          "description": "Total monster kills."
+        },
+        "bossKills": {
+          "type": "number",
+          "description": "Total boss kills."
+        },
+        "statPoints": {
+          "type": "number",
+          "description": "Unspent attribute points."
+        },
+        "skillPoints": {
+          "type": "number",
+          "description": "Unspent passive skill tree points."
+        },
+        "stats": {
+          "type": "object",
+          "description": "Allocated base attributes (might, vitality, agility)."
+        },
+        "unlockedSkillNodes": {
+          "type": "array",
+          "description": "Unlocked passive skill tree node IDs."
+        },
+        "unlockedMounts": {
+          "type": "array",
+          "description": "Unlocked mount IDs (up to 8)."
+        },
+        "activeMount": {
+          "type": "string",
+          "description": "Currently selected mount ID or empty string.",
+          "maxLength": 32
+        },
+        "unlockedPets": {
+          "type": "array",
+          "description": "Unlocked companion pet IDs (up to 8)."
+        },
+        "activePet": {
+          "type": "string",
+          "description": "Currently summoned pet ID or empty string.",
+          "maxLength": 32
+        },
+        "petLevel": {
+          "type": "number",
+          "description": "Active pet companion level."
+        },
+        "petXp": {
+          "type": "number",
+          "description": "Active pet companion experience."
+        },
+        "weaponTier": {
+          "type": "number",
+          "description": "Blacksmith weapon enhancement tier."
+        },
+        "armorTier": {
+          "type": "number",
+          "description": "Blacksmith armor enhancement tier."
+        },
+        "gearBonuses": {
+          "type": "object",
+          "description": "Forged gear attribute bonuses."
+        },
+        "inventorySlots": {
+          "type": "number",
+          "description": "Unlocked inventory slot count (30 to 48)."
+        },
+        "inventory": {
+          "type": "array",
+          "description": "Serialized inventory slots (up to 48)."
+        },
+        "equipment": {
+          "type": "object",
+          "description": "Equipped gear map (weapon, armor, accessory, mountGear)."
+        },
+        "activeQuests": {
+          "type": "array",
+          "description": "Active progression and side quest progress entries."
+        },
+        "completedQuestIds": {
+          "type": "array",
+          "description": "Completed quest IDs."
+        },
+        "unlockedZones": {
+          "type": "array",
+          "description": "Unlocked world zone IDs."
+        },
+        "lastRealm": {
+          "type": "string",
+          "description": "Last server/realm entered by this character.",
+          "maxLength": 24
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server last update timestamp."
+        }
+      },
+      "required": [
+        "playerId",
+        "ownerId",
+        "name",
+        "heroClass",
+        "level",
+        "gold",
+        "inventorySlots",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserAccount" },
+      "description": "Owner-only user account document storing private email, display name, settings, and last server."
+    },
+    "/users/{userId}/characters/{characterId}": {
+      "schema": { "$ref": "#/entities/CharacterProfile" },
+      "description": "Owner-only persistent character roster preserving every created class and progression save."
+    }
+  }
+}

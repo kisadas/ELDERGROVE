@@ -1,0 +1,134 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 2 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidUserAccount(data, userId) {
+      return data.keys().hasAll(['uid', 'email', 'displayName', 'lastServer', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['uid', 'email', 'displayName', 'lastServer', 'settings', 'createdAt', 'updatedAt'])
+        && data.uid == request.auth.uid
+        && data.uid == userId
+        && isValidId(data.uid)
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 160
+        && data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 48
+        && data.lastServer is string && data.lastServer.size() >= 2 && data.lastServer.size() <= 24
+        && (!('settings' in data) || (data.settings is map && data.settings.size() <= 24))
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidCharacterProfile(data, userId, charId) {
+      return data.keys().hasAll([
+        'playerId', 'ownerId', 'name', 'heroClass', 'level', 'gold', 'inventorySlots', 'createdAt', 'updatedAt'
+      ])
+      && data.keys().hasOnly([
+        'playerId', 'ownerId', 'name', 'heroClass', 'jobId', 'jobTier', 'unlockedJobs',
+        'level', 'xp', 'potions', 'gold', 'kills', 'bossKills', 'statPoints', 'skillPoints',
+        'stats', 'unlockedSkillNodes', 'unlockedMounts', 'activeMount',
+        'unlockedPets', 'activePet', 'petLevel', 'petXp',
+        'weaponTier', 'armorTier', 'gearBonuses', 'inventorySlots', 'inventory',
+        'equipment', 'activeQuests', 'completedQuestIds', 'unlockedZones', 'lastRealm',
+        'createdAt', 'updatedAt'
+      ])
+      && isValidId(data.playerId)
+      && data.playerId == charId
+      && isValidId(data.ownerId)
+      && data.ownerId == request.auth.uid
+      && data.ownerId == userId
+      && data.name is string && data.name.size() >= 1 && data.name.size() <= 18
+      && data.heroClass in ['warrior', 'mage', 'archer', 'healer', 'assassin', 'summoner']
+      && (!('jobId' in data) || data.jobId == null || (data.jobId is string && data.jobId.size() <= 40))
+      && (!('jobTier' in data) || (data.jobTier is number && data.jobTier >= 0 && data.jobTier <= 8))
+      && (!('unlockedJobs' in data) || (data.unlockedJobs is list && data.unlockedJobs.size() <= 32 && (data.unlockedJobs.size() == 0 || data.unlockedJobs[0] is string)))
+      && data.level is number && data.level >= 1 && data.level <= 99
+      && (!('xp' in data) || (data.xp is number && data.xp >= 0))
+      && (!('potions' in data) || (data.potions is number && data.potions >= 0 && data.potions <= 999))
+      && data.gold is number && data.gold >= 0 && data.gold <= 99999999
+      && (!('kills' in data) || (data.kills is number && data.kills >= 0))
+      && (!('bossKills' in data) || (data.bossKills is number && data.bossKills >= 0))
+      && (!('statPoints' in data) || (data.statPoints is number && data.statPoints >= 0 && data.statPoints <= 500))
+      && (!('skillPoints' in data) || (data.skillPoints is number && data.skillPoints >= 0 && data.skillPoints <= 200))
+      && (!('stats' in data) || (data.stats is map && data.stats.size() <= 6))
+      && (!('unlockedSkillNodes' in data) || (data.unlockedSkillNodes is list && data.unlockedSkillNodes.size() <= 128 && (data.unlockedSkillNodes.size() == 0 || data.unlockedSkillNodes[0] is string)))
+      && (!('unlockedMounts' in data) || (data.unlockedMounts is list && data.unlockedMounts.size() <= 64 && (data.unlockedMounts.size() == 0 || data.unlockedMounts[0] is string)))
+      && (!('activeMount' in data) || data.activeMount == null || (data.activeMount is string && data.activeMount.size() <= 32))
+      && (!('unlockedPets' in data) || (data.unlockedPets is list && data.unlockedPets.size() <= 64 && (data.unlockedPets.size() == 0 || data.unlockedPets[0] is string)))
+      && (!('activePet' in data) || data.activePet == null || (data.activePet is string && data.activePet.size() <= 32))
+      && (!('petLevel' in data) || (data.petLevel is number && data.petLevel >= 1 && data.petLevel <= 99))
+      && (!('petXp' in data) || (data.petXp is number && data.petXp >= 0))
+      && (!('weaponTier' in data) || (data.weaponTier is number && data.weaponTier >= 0 && data.weaponTier <= 60))
+      && (!('armorTier' in data) || (data.armorTier is number && data.armorTier >= 0 && data.armorTier <= 60))
+      && (!('gearBonuses' in data) || (data.gearBonuses is map && data.gearBonuses.size() <= 8))
+      && data.inventorySlots is number && data.inventorySlots >= 30 && data.inventorySlots <= 64
+      && (!('inventory' in data) || (data.inventory is list && data.inventory.size() <= 64))
+      && (!('equipment' in data) || (data.equipment is map && data.equipment.size() <= 6))
+      && (!('activeQuests' in data) || (data.activeQuests is list && data.activeQuests.size() <= 32))
+      && (!('completedQuestIds' in data) || (data.completedQuestIds is list && data.completedQuestIds.size() <= 128 && (data.completedQuestIds.size() == 0 || data.completedQuestIds[0] is string)))
+      && (!('unlockedZones' in data) || (data.unlockedZones is list && data.unlockedZones.size() <= 16 && (data.unlockedZones.size() == 0 || data.unlockedZones[0] is string)))
+      && (!('lastRealm' in data) || (data.lastRealm is string && data.lastRealm.size() <= 24))
+      && data.createdAt is timestamp
+      && data.updatedAt is timestamp;
+    }
+
+    match /users/{userId} {
+      allow get: if isValidId(userId) && isOwner(userId);
+      allow list: if false;
+      allow create: if isValidId(userId)
+        && isOwner(userId)
+        && isValidUserAccount(incoming(), userId)
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(userId)
+        && isOwner(userId)
+        && isValidUserAccount(incoming(), userId)
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time;
+      allow delete: if false;
+
+      match /characters/{characterId} {
+        allow get: if isValidId(userId) && isValidId(characterId) && isOwner(userId);
+        allow list: if isValidId(userId) && isOwner(userId);
+        allow create: if isValidId(userId)
+          && isValidId(characterId)
+          && isOwner(userId)
+          && isValidCharacterProfile(incoming(), userId, characterId)
+          && incoming().createdAt == request.time
+          && incoming().updatedAt == request.time;
+        allow update: if isValidId(userId)
+          && isValidId(characterId)
+          && isOwner(userId)
+          && isValidCharacterProfile(incoming(), userId, characterId)
+          && incoming().ownerId == existing().ownerId
+          && incoming().playerId == existing().playerId
+          && incoming().heroClass == existing().heroClass
+          && incoming().createdAt == existing().createdAt
+          && incoming().updatedAt == request.time;
+        allow delete: if isValidId(userId) && isValidId(characterId) && isOwner(userId);
+      }
+    }
+  }
+}
